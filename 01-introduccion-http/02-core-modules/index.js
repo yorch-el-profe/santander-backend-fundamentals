@@ -8,6 +8,8 @@
 const os = require("node:os");
 
 // ECMAScript 6
+// Para poder utilizarlo se necesita renombrar
+// la extensión a "mjs"
 // import os from "node:os";
 
 // Mostrar en pantalla el sistema operativo
