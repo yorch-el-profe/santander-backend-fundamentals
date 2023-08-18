@@ -20,12 +20,33 @@ const db = [
 ];
 
 // Obtener todos los productos
+// /getProducts -> Regresar TODOS LOS PRODUCTOS
+// /getProducts?name=sabritas -> Regrear UN PRODUCTO EN PARTICULAR
+
+// QUERY STRING:
+// ? key1 = valor1 & key2 = valor 2 & key3 = valor3 ...
+
+// k = aislante+sonido+puerta
+// crid = ICXSC2JBUTOP
+// sprefix = %2Caps%2C254
+// ref = nb_sb_ss_recent_2_0_recent
+// https://www.amazon.com.mx/s?k=aislante+sonido+puerta&crid=ICXSC2JBUTOP&sprefix=%2Caps%2C254&ref=nb_sb_ss_recent_2_0_recent
+
 app.get("/getProducts", function (request, response) {
 	// Envia toda la lista como recurso
 	// al cliente
 
-	// .json() convierte los objetos de JS a "JSON"
-	response.json(db);
+	if (request.query.name) {
+		// const name = request.query.name;
+		const { name } = request.query;
+		const filtered = db.filter((x) =>
+			x.name.toLowerCase().includes(name.toLowerCase())
+		);
+		response.json(filtered);
+	} else {
+		// .json() convierte los objetos de JS a "JSON"
+		response.json(db);
+	}
 });
 
 // Un API tiene 4 maneras de recibir parámetros
