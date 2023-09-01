@@ -1,6 +1,8 @@
 const { connect, Schema, model } = require("mongoose");
 
-connect("...")
+connect(
+	"mongodb+srv://root:root@bedu.5tygoiv.mongodb.net/jwt?retryWrites=true&w=majority"
+)
 	.then(() => console.log("> Conectado a Mongo Atlas"))
 	.catch(() => console.log("> No se puede conectar a Mongo Atlas"));
 
@@ -14,10 +16,35 @@ const UserSchema = new Schema(
 
 const UserModel = model("users", UserSchema);
 
+const passport = require("passport");
+const { Strategy, ExtractJwt } = require("passport-jwt");
 const jwt = require("jsonwebtoken");
 const express = require("express");
 const app = express();
 const JWT_SECRET = "ssshhhhhh!!!";
+
+// Configurar passport
+passport.use(
+	new Strategy(
+		{
+			// El mismo secreto que se usa para crear el token
+			// se necesita para validarlo
+			secretOrKey: JWT_SECRET,
+
+			// Passport va tomar el token de un encabezado
+			// llamado "Authentication"
+			jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+		},
+		// Esta función se ejecuta una vez que el token fue validado con éxito
+		// con esto buscamos al usuario dentro de la base de datos
+		// y se lo entregamos a passport.
+		async function (payload, done) {
+			const { _id } = payload;
+			const user = await UserModel.findById(_id).exec();
+			done(null, user);
+		}
+	)
+);
 
 app.use(express.json());
 
@@ -67,6 +94,18 @@ app.get("/authenticate", async function (request, response) {
 
 	response.json({ token });
 });
+
+// Indica qué usuario viene dentro del token
+app.get(
+	"/info",
+	// Estoy activando el middleware de Passport
+	// única y exclusivamente para esta ruta
+	passport.authenticate("jwt", { session: false }),
+	function (request, response) {
+		// request.user es el usuario que inicio sesión con el token JWT
+		response.json(request.user);
+	}
+);
 
 app.listen(8080, () => {
 	console.log("> Escuchando puerto 8080");
