@@ -28,3 +28,28 @@ Estudiamos más a profundidad el framework `Express`, así como las `arquitectur
 * [Ejemplo 02](03-creacion-api/02-api/): Creación de un API más complejo utilizando `middlewares` para lectura de datos por `body`.
 * [Ejemplo 03](03-creacion-api/03-mvc/): Creación de un API utilizando la arquitectura `MVC`.
 
+### 4. [Introducción a Bases de Datos Relacionales](04-base-datos-relacionales/)
+
+Vimos una introducción al modelo de una base de datos relacionales; conceptos como tablas, columnas, relaciones.
+
+* [Ejemplo 01](04-base-datos-relacionales/01-sql/): Introducción a SQL y el Data Definition Language.
+
+### 5. [Continuación de Bases de Datos Relacionales](05-bases-datos-relacionales-2/)
+
+Continuamos con el estudio del lenguaje SQL, introducción a las consultas básicas como `SELECT`, `INSERT`, `UPDATE` y `DELETE`.
+
+* [Ejemplo 01](05-bases-datos-relacionales-2/01-foreign-keys.sql): Introducción al concepto de llaves foráneas y el uso de `FOREIGN KEY` en SQL.
+
+* [Ejemplo 02](05-bases-datos-relacionales-2/02-data-manipulation-language.sql): Introducción a `SELECT`, `INSERT`, `UPDATE`, `DELETE`.
+
+* [Ejemplo 03](05-bases-datos-relacionales-2/03-join.sql): Introducción a las uniones de tablas a partir de un `JOIN`.
+
+* [Ejemplo 04](05-bases-datos-relacionales-2/04-biblioteca.sql): Implementación de una biblioteca en base de datos relacionales.
+
+### 6. [Bases de Datos No Relacionales + Mongoose](06-mongoose/)
+
+Estudiamos una introducción a las bases de datos no relacionales, ventajas y desventajas contra una base de datos relacional y la conexión con MongoDB utilizando Mongoose.
+
+* [Ejemplo 01](06-mongoose/01-sql-transactions/): Introducción a las transacciones en SQL y explicación de ACID.
+
+* [Ejemplo 02](06-mongoose/02-mongoose/): Ejemplo de conexión con MongoDB y utilización de Mongoose.
