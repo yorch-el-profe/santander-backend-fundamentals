@@ -32,5 +32,109 @@ const AuthorSchema = new Schema(
 	{ timestamps: true }
 );
 
+const UserSchema = new Schema(
+	{
+		username: { type: String, required: true, unique: true, maxlength: 50 },
+		password: { type: String, maxlength: 50, minlength: 8 },
+	},
+	{ timestamps: true }
+);
+
 const BookModel = model("books", BookSchema);
 const AuthorModel = model("authors", AuthorSchema);
+const UserModel = model("users", UserSchema);
+
+// API
+const express = require("express");
+const app = express();
+
+app.use(express.json());
+
+app.get("/getAllAuthors", async function (request, response) {
+	try {
+		const documents = await AuthorModel.find().exec();
+		response.json(documents);
+	} catch (e) {
+		console.error(e);
+		response.json({ error: "Error al consultar todos los autores de la BD" });
+	}
+});
+
+app.get("/getAuthor/:_id", async function (request, response) {
+	try {
+		const { _id } = request.params;
+		const document = await AuthorModel.findById(_id).exec();
+		response.json(document);
+	} catch (e) {
+		console.error(e);
+		response.json({ error: "Error al obtener el autor" });
+	}
+});
+
+app.get("/createAuthor", async function (request, response) {
+	try {
+		const instance = new AuthorModel(request.body);
+		const document = await instance.save();
+		response.json(document);
+	} catch (e) {
+		console.error(e);
+		response.json({ error: "Error al insertar un autor" });
+	}
+});
+
+app.get("/getAllBooks", async function (request, response) {
+	try {
+		const documents = await BookModel.find().exec();
+		response.json(documents);
+	} catch (e) {
+		console.error(e);
+		response.json({ error: "Error al obtener todos los libros" });
+	}
+});
+
+app.get("/getBook/:_id", async function (request, response) {
+	try {
+		const { _id } = request.params;
+		const document = await BookModel.findById(_id)
+			.populate("author", { name: 1, isDead: 1, _id: 0 })
+			.exec();
+		response.json(document);
+	} catch (e) {
+		console.error(e);
+		response.json({ error: "Error al obtener el libro" });
+	}
+});
+
+app.get("/createBook", async function (request, response) {
+	try {
+		const { author } = request.body;
+
+		const authorDocument = await AuthorModel.findById(author).exec();
+
+		if (!authorDocument) {
+			return response.json({ error: "El autor no existe" });
+		}
+
+		const instance = new BookModel(request.body);
+		const document = await instance.save();
+		response.json(document);
+	} catch (e) {
+		console.error(e);
+		response.json({ error: "Error al crear un libro" });
+	}
+});
+
+app.get("/createUser", async function (request, response) {
+	try {
+		const instance = await UserModel(request.body);
+		const document = await instance.save();
+		response.json(document);
+	} catch (e) {
+		console.error(e);
+		response.json({ error: "Error al crear usuario" });
+	}
+});
+
+app.listen(process.env.PORT, function () {
+	console.log("> Escuchando puerto " + process.env.PORT);
+});
