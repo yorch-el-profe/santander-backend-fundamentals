@@ -1,10 +1,10 @@
-// Leer las variables de entorno del archivo .env
+// I. Leer las variables de entorno del archivo .env
 require("dotenv").config();
 
-// Base de Datos
+// II. Base de Datos
 const { connect, Schema, model } = require("mongoose");
 
-// 1. Conexión con Mongo Atlas
+// Conexión con Mongo Atlas
 connect(process.env.MONGO_ATLAS_URL)
 	.then(() => console.log("> Conectado a Mongo Atlas"))
 	.catch(() => {
@@ -12,7 +12,7 @@ connect(process.env.MONGO_ATLAS_URL)
 		process.exit(1); // Proceso termine con ERROR (1)
 	});
 
-// 2. Creación de esquemas y modelos
+// Creación de esquemas y modelos
 const BookSchema = new Schema(
 	{
 		isbn: { type: String, unique: true, required: true, maxlength: 20 },
@@ -44,11 +44,35 @@ const BookModel = model("books", BookSchema);
 const AuthorModel = model("authors", AuthorSchema);
 const UserModel = model("users", UserSchema);
 
-// API
+// III. Seguridad
+const jwt = require("jsonwebtoken");
+
+function jwtValidation(request, response, next) {
+	const token = request.get("Authorization");
+
+	try {
+		const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+		// Creando un objeto "user" dentro del request
+		request.user = payload;
+
+		next();
+	} catch (e) {
+		response
+			.status(401)
+			.json({ error: "No tienes autorización para este recurso" });
+	}
+}
+
+// IV. API
 const express = require("express");
 const app = express();
 
 app.use(express.json());
+
+// Esto es equivalente a lo usado abajo
+// app.use("/createAuthor", jwtValidation);
+// app.use("/createBook", jwtValidation);
 
 app.get("/getAllAuthors", async function (request, response) {
 	try {
@@ -71,7 +95,7 @@ app.get("/getAuthor/:_id", async function (request, response) {
 	}
 });
 
-app.get("/createAuthor", async function (request, response) {
+app.get("/createAuthor", jwtValidation, async function (request, response) {
 	try {
 		const instance = new AuthorModel(request.body);
 		const document = await instance.save();
@@ -105,7 +129,7 @@ app.get("/getBook/:_id", async function (request, response) {
 	}
 });
 
-app.get("/createBook", async function (request, response) {
+app.get("/createBook", jwtValidation, async function (request, response) {
 	try {
 		const { author } = request.body;
 
@@ -132,6 +156,29 @@ app.get("/createUser", async function (request, response) {
 	} catch (e) {
 		console.error(e);
 		response.json({ error: "Error al crear usuario" });
+	}
+});
+
+app.get("/login", async function (request, response) {
+	try {
+		const { username, password } = request.body;
+
+		// { username } => { "username": username }
+		const document = await UserModel.findOne({ username }).exec();
+
+		if (!document) {
+			return response.json({ error: "El usuario o contraseña son inválidos" });
+		}
+
+		if (document.password !== password) {
+			return response.json({ error: "El usuario o contraseña son inválidos" });
+		}
+
+		const token = jwt.sign({ _id: document._id }, process.env.JWT_SECRET);
+		response.json({ token });
+	} catch (e) {
+		console.error(e);
+		response.json({ error: "Errror al iniciar sesión" });
 	}
 });
 
