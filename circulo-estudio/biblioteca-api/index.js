@@ -19,6 +19,7 @@ const BookSchema = new Schema(
 		title: { type: String, required: true, maxlength: 200 },
 		year: { type: Number, required: true, min: -2000, max: 3000 },
 		author: { type: Schema.Types.ObjectId, ref: "authors" },
+		user: { type: Schema.Types.ObjectId, ref: "users" },
 	},
 	{ timestamps: true }
 );
@@ -28,6 +29,7 @@ const AuthorSchema = new Schema(
 		name: { type: String, required: true, maxlength: 200 },
 		age: { type: Number, min: 0 },
 		isDead: { type: Boolean, default: false },
+		user: { type: Schema.Types.ObjectId, ref: "users" },
 	},
 	{ timestamps: true }
 );
@@ -97,7 +99,10 @@ app.get("/getAuthor/:_id", async function (request, response) {
 
 app.get("/createAuthor", jwtValidation, async function (request, response) {
 	try {
-		const instance = new AuthorModel(request.body);
+		const instance = new AuthorModel({
+			...request.body,
+			user: request.user._id,
+		});
 		const document = await instance.save();
 		response.json(document);
 	} catch (e) {
@@ -139,7 +144,7 @@ app.get("/createBook", jwtValidation, async function (request, response) {
 			return response.json({ error: "El autor no existe" });
 		}
 
-		const instance = new BookModel(request.body);
+		const instance = new BookModel({ ...request.body, user: request.user._id });
 		const document = await instance.save();
 		response.json(document);
 	} catch (e) {
