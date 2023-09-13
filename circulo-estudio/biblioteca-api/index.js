@@ -178,7 +178,7 @@ app.get("/login", async function (request, response) {
 		response.json({ token });
 	} catch (e) {
 		console.error(e);
-		response.json({ error: "Errror al iniciar sesión" });
+		response.json({ error: "Error al iniciar sesión" });
 	}
 });
 
